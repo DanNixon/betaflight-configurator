@@ -374,19 +374,25 @@ OSD.constants = {
       name: 'CROSSHAIRS',
       desc: 'osdDescElementCrosshairs',
       default_position: -1,
-      positionable: false
+      positionable: function() {
+        semver.gte(CONFIG.apiVersion, "1.37.0");
+      }
     },
     ARTIFICIAL_HORIZON: {
       name: 'ARTIFICIAL_HORIZON',
       desc: 'osdDescElementArtificialHorizon',
       default_position: -1,
-      positionable: false
+      positionable: function() {
+        semver.gte(CONFIG.apiVersion, "1.37.0");
+      }
     },
     HORIZON_SIDEBARS: {
       name: 'HORIZON_SIDEBARS',
       desc: 'osdDescElementHorizonSidebars',
       default_position: -1,
-      positionable: false
+      positionable: function() {
+        semver.gte(CONFIG.apiVersion, "1.37.0");
+      }
     },
     CURRENT_DRAW: {
       name: 'CURRENT_DRAW',
@@ -930,6 +936,10 @@ OSD.updateDisplaySize = function() {
     y: OSD.constants.VIDEO_LINES[video_type],
     total: null
   };
+};
+
+OSD.isPositionable = function(i) {
+  return typeof(i.positionable === 'function') ? e.positionable() : e.positionable;
 };
 
 
@@ -1527,7 +1537,7 @@ TABS.osd.initialize = function (callback) {
                 })
               );
               $field.append('<label for="'+field.name+'" class="char-label">'+inflection.titleize(field.name)+'</label>');
-              if (field.positionable && field.isVisible) {
+              if (OSD.isPositionable(field) && field.isVisible) {
                 $field.append(
                   $('<input type="number" class="'+field.index+' position"></input>')
                   .data('field', field)
@@ -1638,7 +1648,7 @@ TABS.osd.initialize = function (callback) {
               // Required for NW.js - Otherwise the <img /> will
               // consume drag/drop events.
               $img.find('img').css('pointer-events', 'none');
-              if (field && field.positionable) {
+              if (field && OSD.isPositionable(field)) {
                 $img
                   .addClass('field-'+field.index)
                   .data('field', field)
